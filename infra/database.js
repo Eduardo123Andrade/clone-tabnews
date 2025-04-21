@@ -10,10 +10,14 @@ async function query(args) {
   });
   await client.connect();
 
-  const result = await client.query(args);
-  await client.end();
-
-  return result;
+  try {
+    const result = await client.query(args);
+    return result;
+  } catch (error) {
+    console.error(error);
+  } finally {
+    await client.end();
+  }
 }
 
 export default {
