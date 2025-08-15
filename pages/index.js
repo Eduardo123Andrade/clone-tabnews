@@ -4,6 +4,7 @@ const Home = () => {
 
 const test = () => {
   console.log("olar");
+  console.log("olar");
 };
 
 export default Home;
