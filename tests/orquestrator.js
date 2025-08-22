@@ -2,12 +2,16 @@ import retry from "async-retry";
 
 const fetchStatusPage = async () => {
   const response = await fetch("http://localhost:3000/api/v1/status");
-  const responseBody = await response.json();
+
+  if (response.status !== 200) {
+    throw new Error();
+  }
 };
 
 const waitForWebServer = async () => {
   return retry(fetchStatusPage, {
     retries: 100,
+    maxTimeout: 5000,
   });
 };
 
