@@ -23,4 +23,4 @@ const orquestrator = {
   waitForAllServices,
 };
 
-export default orquestrator
+export default orquestrator;
