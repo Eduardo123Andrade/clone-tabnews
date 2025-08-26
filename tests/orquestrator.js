@@ -19,6 +19,8 @@ const waitForAllServices = async () => {
   await waitForWebServer();
 };
 
-export default {
+const orquestrator = {
   waitForAllServices,
 };
+
+export default orquestrator
