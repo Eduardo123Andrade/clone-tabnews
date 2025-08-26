@@ -1,6 +1,6 @@
 const { exec } = require("node:child_process");
 
-const handleReturn = (error, stdout, stderr) => {
+const handleReturn = (error, stdout) => {
   if (stdout.search("accepting connections") === -1) {
     process.stdout.write(".");
     checkPostgres();
@@ -14,6 +14,5 @@ const checkPostgres = () => {
 };
 
 process.stdout.write("\n\n🔴 Aguardando Postgres aceitar conexões");
-//
 
 checkPostgres();
