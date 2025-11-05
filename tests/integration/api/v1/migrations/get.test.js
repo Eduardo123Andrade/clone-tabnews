@@ -2,8 +2,7 @@ import orquestrator from "tests/orquestrator";
 
 beforeAll(async () => {
   await orquestrator.waitForAllServices();
-  await orquestrator.clearDatabase()
-
+  await orquestrator.clearDatabase();
 });
 describe("GET /api/v1/migrations", () => {
   describe("Anonymous user", () => {
@@ -15,5 +14,5 @@ describe("GET /api/v1/migrations", () => {
       expect(Array.isArray(responseBody)).toBe(true);
       expect(responseBody.length).toBeGreaterThan(0);
     });
-  })
-})
+  });
+});

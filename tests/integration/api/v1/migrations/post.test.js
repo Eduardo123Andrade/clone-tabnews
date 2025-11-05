@@ -5,7 +5,7 @@ beforeAll(async () => {
 });
 
 async function cleanDatabase() {
-  await orquestrator.clearDatabase()
+  await orquestrator.clearDatabase();
 }
 
 beforeAll(cleanDatabase);
@@ -13,7 +13,6 @@ beforeAll(cleanDatabase);
 describe("POST /api/v1/migrations", () => {
   describe("Anonymous user", () => {
     describe("Running pending migrations", () => {
-
       test("For the first time", async () => {
         const response1 = await fetch("http:localhost:3000/api/v1/migrations", {
           method: "POST",
@@ -35,6 +34,6 @@ describe("POST /api/v1/migrations", () => {
         expect(Array.isArray(response2Body)).toBe(true);
         expect(response2Body.length).toBe(0);
       });
-    })
-  })
-})
+    });
+  });
+});

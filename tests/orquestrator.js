@@ -22,11 +22,11 @@ const waitForAllServices = async () => {
 
 const clearDatabase = async () => {
   await database.query("drop schema public cascade; create schema public");
-}
+};
 
 const orquestrator = {
   waitForAllServices,
-  clearDatabase
+  clearDatabase,
 };
 
 export default orquestrator;
