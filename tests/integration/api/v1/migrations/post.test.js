@@ -1,4 +1,3 @@
-import database from "infra/database";
 import orquestrator from "tests/orquestrator";
 
 beforeAll(async () => {
@@ -6,7 +5,7 @@ beforeAll(async () => {
 });
 
 async function cleanDatabase() {
-  await database.query("drop schema public cascade; create schema public");
+  await orquestrator.clearDatabase()
 }
 
 beforeAll(cleanDatabase);
