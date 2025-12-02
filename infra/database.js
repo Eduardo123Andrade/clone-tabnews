@@ -7,7 +7,7 @@ async function query(args) {
     const result = await client.query(args);
     return result;
   } catch (error) {
-    console.log('\n Erro dentro do catch do database.js:')
+    console.log("\n Erro dentro do catch do database.js:");
     console.error(error);
     throw error;
   } finally {
