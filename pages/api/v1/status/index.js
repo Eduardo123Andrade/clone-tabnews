@@ -1,48 +1,58 @@
+import { createRouter } from "next-connect";
 import database from "infra/database.js";
-import { InternalServerError } from "infra/errors";
+import { InternalServerError, MethodNotAllowedError } from "infra/errors";
 
-async function status(request, response) {
-  try {
-    const updateAt = new Date().toISOString();
+const router = createRouter();
 
-    const result = await database.query("SHOW server_version;");
-    const dataBaseVersionValue = result.rows[0].server_version;
-    const databaseMaxConnectionsResult = await database.query(
-      "SHOW max_connections;",
-    );
+router.get(getHandler);
 
-    const databaseMaxConnectionsValue =
-      databaseMaxConnectionsResult.rows[0].max_connections;
+export default router.handler({
+  onNoMatch: onNoMatchHandler,
+  onError: onErrorHandler,
+});
 
-    const databaseName = process.env.POSTGRES_DB;
+async function getHandler(request, response) {
+  const updateAt = new Date().toISOString();
 
-    const databaseOpenConnectionsResults = await database.query({
-      text: "SELECT COUNT(*)::int FROM pg_stat_activity WHERE datname = $1;",
-      values: [databaseName],
-    });
+  const result = await database.query("SHOW server_version;");
+  const dataBaseVersionValue = result.rows[0].server_version;
+  const databaseMaxConnectionsResult = await database.query(
+    "SHOW max_connections;",
+  );
 
-    const databaseOpenConnectionsValue =
-      databaseOpenConnectionsResults.rows[0].count;
-    return response.status(200).json({
-      updated_at: updateAt,
-      dependencies: {
-        database: {
-          version: dataBaseVersionValue,
-          max_connections: parseInt(databaseMaxConnectionsValue),
-          open_connections: databaseOpenConnectionsValue,
-        },
+  const databaseMaxConnectionsValue =
+    databaseMaxConnectionsResult.rows[0].max_connections;
+
+  const databaseName = process.env.POSTGRES_DB;
+
+  const databaseOpenConnectionsResults = await database.query({
+    text: "SELECT COUNT(*)::int FROM pg_stat_activity WHERE datname = $1;",
+    values: [databaseName],
+  });
+
+  const databaseOpenConnectionsValue =
+    databaseOpenConnectionsResults.rows[0].count;
+  return response.status(200).json({
+    updated_at: updateAt,
+    dependencies: {
+      database: {
+        version: dataBaseVersionValue,
+        max_connections: parseInt(databaseMaxConnectionsValue),
+        open_connections: databaseOpenConnectionsValue,
       },
-    });
-  } catch (error) {
-    const publicErrorObject = new InternalServerError({
-      cause: error,
-    });
-
-    console.log("\n Erro dentro do catch do controller:");
-    console.log(publicErrorObject);
-
-    response.status(500).json(publicErrorObject);
-  }
+    },
+  });
 }
 
-export default status;
+function onNoMatchHandler(request, response) {
+  const publicErrorObject = new MethodNotAllowedError();
+  response.status(publicErrorObject.statusCode).json(publicErrorObject);
+}
+
+function onErrorHandler(error, request, response) {
+  const publicErrorObject = new InternalServerError({
+    cause: error,
+  });
+
+  response.status(500).json(publicErrorObject);
+}
