@@ -71,4 +71,3 @@ async function handlePostMigrations(request, response) {
     await dbClient.end();
   }
 }
-
