@@ -2,7 +2,6 @@ import { resolve } from "node:path";
 import database from "infra/database.js";
 import migrationRunner from "node-pg-migrate";
 
-
 // TODO - desafio dia 40 aula  01 - Colocar o erro de serviço (Assistir o minuto 16)
 
 const defaultMigrationOptions = {
@@ -11,7 +10,6 @@ const defaultMigrationOptions = {
   verbose: true,
   migrationsTable: "pgmigrations",
 };
-
 
 async function listPendingMigrations() {
   let dbClient;
@@ -25,7 +23,7 @@ async function listPendingMigrations() {
     };
 
     const pendingMigrations = await migrationRunner(config);
-    return pendingMigrations
+    return pendingMigrations;
   } catch (error) {
     console.log(error);
     throw error;
@@ -46,10 +44,9 @@ async function runPendingMigrations() {
       dbClient,
     };
 
-
     const migratedMigrations = await migrationRunner(config);
 
-    return migratedMigrations
+    return migratedMigrations;
   } catch (error) {
     console.log(error);
     throw error;
@@ -58,10 +55,9 @@ async function runPendingMigrations() {
   }
 }
 
-
 const migrator = {
   listPendingMigrations,
-  runPendingMigrations
-}
+  runPendingMigrations,
+};
 
-export default migrator
+export default migrator;

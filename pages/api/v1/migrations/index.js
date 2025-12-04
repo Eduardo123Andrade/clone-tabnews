@@ -8,7 +8,6 @@ router.get(handleGetMigrations).post(handlePostMigrations);
 
 export default router.handler(controller.errorHandlers);
 
-
 async function handleGetMigrations(request, response) {
   const pendingMigrations = await migrator.listPendingMigrations();
 
@@ -16,7 +15,6 @@ async function handleGetMigrations(request, response) {
 }
 
 async function handlePostMigrations(request, response) {
-
   const migratedMigrations = await migrator.runPendingMigrations();
 
   if (migratedMigrations.length) {
