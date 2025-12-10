@@ -1,48 +1,25 @@
-import database from "infra/database.js";
-import migrationRunner from "node-pg-migrate";
-import { resolve } from "node:path";
+import controller from "infra/controller";
+import migrator from "models/migrator";
+import { createRouter } from "next-connect";
 
-export default async function migrations(request, response) {
-  const allowedMethods = ["GET", "POST"];
+const router = createRouter();
 
-  if (!allowedMethods.includes(request.method)) {
-    return response.status(405).json({
-      error: `Method ${request.method} not allowed`,
-    });
+router.get(handleGetMigrations).post(handlePostMigrations);
+
+export default router.handler(controller.errorHandlers);
+
+async function handleGetMigrations(request, response) {
+  const pendingMigrations = await migrator.listPendingMigrations();
+
+  return response.status(200).json(pendingMigrations);
+}
+
+async function handlePostMigrations(request, response) {
+  const migratedMigrations = await migrator.runPendingMigrations();
+
+  if (migratedMigrations.length) {
+    return response.status(201).json(migratedMigrations);
   }
 
-  let dbClient;
-
-  try {
-    dbClient = await database.getNewClient();
-    const dryRun = request.method === "GET";
-    const defaultMigrationOptions = {
-      dbClient,
-      dryRun,
-      dir: resolve("infra", "migrations"),
-      direction: "up",
-      verbose: true,
-      migrationsTable: "pgmigrations",
-    };
-
-    if (request.method === "GET") {
-      const pendingMigrations = await migrationRunner(defaultMigrationOptions);
-      return response.status(200).json(pendingMigrations);
-    }
-
-    if (request.method === "POST") {
-      const migratedMigrations = await migrationRunner(defaultMigrationOptions);
-
-      if (migratedMigrations.length) {
-        return response.status(201).json(migratedMigrations);
-      }
-
-      return response.status(200).json(migratedMigrations);
-    }
-  } catch (error) {
-    console.log(error);
-    throw error;
-  } finally {
-    await dbClient.end();
-  }
+  return response.status(200).json(migratedMigrations);
 }
