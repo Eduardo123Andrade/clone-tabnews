@@ -1,4 +1,3 @@
-import { version as uuidVersion } from "uuid";
 import orquestrator from "tests/orquestrator";
 
 beforeAll(async () => {
