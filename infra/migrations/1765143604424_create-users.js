@@ -3,7 +3,7 @@ exports.up = (pgm) => {
     id: {
       type: "uuid",
       primaryKey: true,
-      default: pgm.func("gen_random_uuid()")
+      default: pgm.func("gen_random_uuid()"),
     },
     // For reference, GitHub limits usernames to 39 characters
     username: {
@@ -11,7 +11,7 @@ exports.up = (pgm) => {
       notNull: true,
       unique: true,
     },
-    // Why 254 in length? https://stackoverflow.com/a/1199238 
+    // Why 254 in length? https://stackoverflow.com/a/1199238
     email: {
       type: "varchar(254)",
       notNull: true,
@@ -39,4 +39,4 @@ exports.up = (pgm) => {
   })
 };
 
-exports.down = false
+exports.down = false;
