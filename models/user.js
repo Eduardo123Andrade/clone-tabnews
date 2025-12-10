@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import database from "infra/database.js";
-import { ValidationError } from "infra/errors.js";
+import { NotFoundError, ValidationError } from "infra/errors.js";
 
 const runInsertQuery = async (userInputValues) => {
   const result = await database.query({
@@ -63,6 +63,33 @@ const validateUniqueUserName = async (username) => {
   }
 };
 
+const runSelectQuery = async (username) => {
+  const result = await database.query({
+    text: `
+        SELECT 
+          username,
+          email,
+          id
+        FROM 
+          users 
+        WHERE
+          LOWER(username) = LOWER($1) 
+        LIMIT
+          1;
+      `,
+    values: [username],
+  });
+
+  if (!result.rowCount) {
+    throw new NotFoundError({
+      message: "O username informado não foi encontrado no sistema.",
+      action: "Verifique se o username está digitado corretamente.",
+    });
+  }
+
+  return result.rows[0];
+};
+
 const create = async (userInputValues) => {
   await Promise.all([
     validateUniqueEmail(userInputValues.email),
@@ -73,8 +100,14 @@ const create = async (userInputValues) => {
   return newUser;
 };
 
+const findOneByUsername = async (username) => {
+  const result = await runSelectQuery(username);
+  return result;
+};
+
 const user = {
   create,
+  findOneByUsername,
 };
 
 export default user;
