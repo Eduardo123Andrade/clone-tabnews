@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 import database from "infra/database.js";
 import { NotFoundError, ValidationError } from "infra/errors.js";
+import password from "models/password";
 
 const runInsertQuery = async (userInputValues) => {
   const result = await database.query({
@@ -17,6 +18,8 @@ const runInsertQuery = async (userInputValues) => {
       userInputValues.password,
     ],
   });
+
+  console.log(result.rows[0]);
 
   return result.rows[0];
 };
@@ -69,7 +72,8 @@ const runSelectQuery = async (username) => {
         SELECT 
           username,
           email,
-          id
+          id,
+          password
         FROM 
           users 
         WHERE
@@ -90,13 +94,19 @@ const runSelectQuery = async (username) => {
   return result.rows[0];
 };
 
+const hashPasswordInObject = async (userInputValues) => {
+  const hashedPassword = await password.hash(userInputValues.password);
+  userInputValues.password = hashedPassword;
+};
+
 const create = async (userInputValues) => {
-  await Promise.all([
-    validateUniqueEmail(userInputValues.email),
-    validateUniqueUserName(userInputValues.username),
-  ]);
+  await validateUniqueEmail(userInputValues.email);
+  await validateUniqueUserName(userInputValues.username);
+  await hashPasswordInObject(userInputValues);
 
   const newUser = await runInsertQuery(userInputValues);
+
+  console.log(newUser);
   return newUser;
 };
 

@@ -1,72 +1,83 @@
-import orquestrator from "tests/orquestrator";
+import { version as uuidVersion } from "uuid";
+import orchestrator from "tests/orquestrator";
 
 beforeAll(async () => {
-  await orquestrator.waitForAllServices();
-  await orquestrator.clearDatabase();
-  await orquestrator.runPendingMigrations();
+  await orchestrator.waitForAllServices();
+  await orchestrator.clearDatabase();
+  await orchestrator.runPendingMigrations();
 });
 
-describe("POST /api/v1/users", () => {
+describe("GET /api/v1/users/[username]", () => {
   describe("Anonymous user", () => {
     test("With exact case match", async () => {
-      await fetch("http:localhost:3000/api/v1/users", {
+      const response1 = await fetch("http://localhost:3000/api/v1/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           username: "MesmoCase",
-          email: "mesmo.case@test.com",
-          password: "teste@123",
+          email: "mesmo.case@curso.dev",
+          password: "senha123",
         }),
       });
 
-      const response = await fetch(
-        "http:localhost:3000/api/v1/users/MesmoCase",
+      expect(response1.status).toBe(201);
+
+      const response2 = await fetch(
+        "http://localhost:3000/api/v1/users/MesmoCase",
       );
 
-      expect(response.status).toBe(200);
+      expect(response2.status).toBe(200);
 
-      const responseBody = await response.json();
+      const response2Body = await response2.json();
 
-      expect(responseBody).toEqual({
-        id: responseBody.id,
+      expect(response2Body).toEqual({
+        id: response2Body.id,
         username: "MesmoCase",
-        email: "mesmo.case@test.com",
+        email: "mesmo.case@curso.dev",
+        password: response2Body.password,
       });
+
+      expect(uuidVersion(response2Body.id)).toBe(4);
     });
 
-    test("Case miss match", async () => {
-      await fetch("http:localhost:3000/api/v1/users", {
+    test("With case mismatch", async () => {
+      const response1 = await fetch("http://localhost:3000/api/v1/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           username: "CaseDiferente",
-          email: "case.diferente@test.com",
-          password: "teste@123",
+          email: "case.diferente@curso.dev",
+          password: "senha123",
         }),
       });
 
-      const response = await fetch(
-        "http:localhost:3000/api/v1/users/casediferente",
+      expect(response1.status).toBe(201);
+
+      const response2 = await fetch(
+        "http://localhost:3000/api/v1/users/casediferente",
       );
 
-      expect(response.status).toBe(200);
+      expect(response2.status).toBe(200);
 
-      const responseBody = await response.json();
+      const response2Body = await response2.json();
 
-      expect(responseBody).toEqual({
-        id: responseBody.id,
+      expect(response2Body).toEqual({
+        id: response2Body.id,
         username: "CaseDiferente",
-        email: "case.diferente@test.com",
+        email: "case.diferente@curso.dev",
+        password: response2Body.password,
       });
+
+      expect(uuidVersion(response2Body.id)).toBe(4);
     });
 
-    test("With none exists username", async () => {
+    test("With nonexistent username", async () => {
       const response = await fetch(
-        "http:localhost:3000/api/v1/users/UsuarioInexistente",
+        "http://localhost:3000/api/v1/users/UsuarioInexistente",
       );
 
       expect(response.status).toBe(404);
