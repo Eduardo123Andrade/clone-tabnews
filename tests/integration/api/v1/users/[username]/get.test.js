@@ -37,6 +37,8 @@ describe("GET /api/v1/users/[username]", () => {
         username: "MesmoCase",
         email: "mesmo.case@curso.dev",
         password: response2Body.password,
+        created_at: response2Body.created_at,
+        updated_at: response2Body.updated_at,
       });
 
       expect(uuidVersion(response2Body.id)).toBe(4);
@@ -70,6 +72,8 @@ describe("GET /api/v1/users/[username]", () => {
         username: "CaseDiferente",
         email: "case.diferente@curso.dev",
         password: response2Body.password,
+        created_at: response2Body.created_at,
+        updated_at: response2Body.updated_at,
       });
 
       expect(uuidVersion(response2Body.id)).toBe(4);
