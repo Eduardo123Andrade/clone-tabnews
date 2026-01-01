@@ -1,28 +1,21 @@
-import orquestrator from "tests/orquestrator";
+import { version as uuidVersion } from "uuid";
+import orchestrator from "tests/orchestrator.js";
 
 beforeAll(async () => {
-  await orquestrator.waitForAllServices();
-  await orquestrator.clearDatabase();
-  await orquestrator.runPendingMigrations();
+  await orchestrator.waitForAllServices();
+  await orchestrator.clearDatabase();
+  await orchestrator.runPendingMigrations();
 });
 
-describe("POST /api/v1/users", () => {
+describe("GET /api/v1/users/[username]", () => {
   describe("Anonymous user", () => {
     test("With exact case match", async () => {
-      await fetch("http:localhost:3000/api/v1/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: "MesmoCase",
-          email: "mesmo.case@test.com",
-          password: "teste@123",
-        }),
+      const createdUser = await orchestrator.createUser({
+        username: "MesmoCase",
       });
 
       const response = await fetch(
-        "http:localhost:3000/api/v1/users/MesmoCase",
+        "http://localhost:3000/api/v1/users/MesmoCase",
       );
 
       expect(response.status).toBe(200);
@@ -32,25 +25,24 @@ describe("POST /api/v1/users", () => {
       expect(responseBody).toEqual({
         id: responseBody.id,
         username: "MesmoCase",
-        email: "mesmo.case@test.com",
+        email: createdUser.email,
+        password: responseBody.password,
+        created_at: responseBody.created_at,
+        updated_at: responseBody.updated_at,
       });
+
+      expect(uuidVersion(responseBody.id)).toBe(4);
+      expect(Date.parse(responseBody.created_at)).not.toBeNaN();
+      expect(Date.parse(responseBody.updated_at)).not.toBeNaN();
     });
 
-    test("Case miss match", async () => {
-      await fetch("http:localhost:3000/api/v1/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: "CaseDiferente",
-          email: "case.diferente@test.com",
-          password: "teste@123",
-        }),
+    test("With case mismatch", async () => {
+      const createdUser = await orchestrator.createUser({
+        username: "CaseDiferente",
       });
 
       const response = await fetch(
-        "http:localhost:3000/api/v1/users/casediferente",
+        "http://localhost:3000/api/v1/users/casediferente",
       );
 
       expect(response.status).toBe(200);
@@ -60,13 +52,20 @@ describe("POST /api/v1/users", () => {
       expect(responseBody).toEqual({
         id: responseBody.id,
         username: "CaseDiferente",
-        email: "case.diferente@test.com",
+        email: createdUser.email,
+        password: responseBody.password,
+        created_at: responseBody.created_at,
+        updated_at: responseBody.updated_at,
       });
+
+      expect(uuidVersion(responseBody.id)).toBe(4);
+      expect(Date.parse(responseBody.created_at)).not.toBeNaN();
+      expect(Date.parse(responseBody.updated_at)).not.toBeNaN();
     });
 
-    test("With none exists username", async () => {
+    test("With nonexistent username", async () => {
       const response = await fetch(
-        "http:localhost:3000/api/v1/users/UsuarioInexistente",
+        "http://localhost:3000/api/v1/users/UsuarioInexistente",
       );
 
       expect(response.status).toBe(404);
